@@ -1,21 +1,25 @@
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
-  const body = await request.json();
-  const { cantidad, iva } = body;
+export async function GET(request: Request) {
+//   const body = await request.json();
+//   const { cantidad, iva } = body;
+ const { searchParams } = new URL(request.url);
+  const cantidad = parseFloat(searchParams.get('cantidad') || '0');
+  const iva = parseFloat(searchParams.get('iva') || '0');
 
-  if (typeof cantidad !== 'number' || typeof iva !== 'number') {
+  if (isNaN(cantidad)|| isNaN(iva) || cantidad <= 0 || iva <= 0) {
     return NextResponse.json({ message: 'Los datos enviados no son válidos.' }, { status: 400 });
   }
 
-  const total = cantidad + iva;
+  const IVA = iva
+  const total = cantidad + IVA;
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/calculoIVA/salida`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ total }),
+    body: JSON.stringify({ total, IVA }),
   });
 
   if (!response.ok) {
